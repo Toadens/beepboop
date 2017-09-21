@@ -1,6 +1,6 @@
 /**
  * @author Johnny Edgett
- * @version 1.01
+ * @version 1.02
  * This is the client side of a small client-server application. 
  * When the user beeps, the server boops!
  * Also it uses threads because I am trying to brush up on my programming...
@@ -8,13 +8,11 @@
 package Client;
 
 import java.io.BufferedReader;
+
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.util.Scanner;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class Client {
     
@@ -24,19 +22,14 @@ public class Client {
     public static void main(String[] args) throws IOException{
         // End if there are not enough arguments
         //if(args.length != 3){
-          //  System.out.println("Usage: beep [server socket] [beepcount] [# threads]");
+          //  System.out.println("Usage: beep [server socket]");
             //System.exit(-1);
         //}
         BufferedReader in = null;
         PrintWriter out = null;
         
-        // Test Block
         int num1 = 1234;
-        int num2 = 2;
-        int num3 = 3;
-        // Test Block
-        
-        // Define the hostName here
+
         String hostName= "localhost";
         //int portNum = Integer.parseInt(args[0]);
         
@@ -48,42 +41,35 @@ public class Client {
         }catch(IOException e){
             System.out.println(e.getMessage());
         }
-        out.println("beep");
         
-        // Create BeepThreads
-        //for(int i = 1; i <= args.length; i++){
-        //    new BeepThread(num1, num2, 1).start();
-        //}
-        String response = null;
-        
-        while((response = in.readLine()) != null){
-            System.out.println(response);
-        }
+        new BeepThread(num1, in, out).start();
     }
 }
 
-class BeepThread extends Thread{
-    int socket;
-    int beepCount;
-    int threadNum;
+class BeepThread extends Thread {
+    public int socket;
+    public BufferedReader in;
+    public PrintWriter out;
     
-    public BeepThread(int beepCount, int socket, int threadNum){
+    public BeepThread(int socket, BufferedReader in, PrintWriter out){
         this.socket = socket;
-        this.beepCount = beepCount;
-        this.threadNum = threadNum;
-        
-        System.out.println("Beep thread " + threadNum + " created");
+        this.in = in;
+        this.out = out;
     }
     
     @Override
     public void run(){
-        while(true){
-            try {
-                System.out.println("Hello I am thread number " + threadNum + " :)");
-                Thread.sleep(1);
-            } catch (InterruptedException ex) {
-                Logger.getLogger(BeepThread.class.getName()).log(Level.SEVERE, null, ex);
+        String output;
+        
+        out.println("beep");
+        
+        try {
+            // Handle server response here
+            while((output = in.readLine()) != null){
+                System.out.println(output);
             }
+        } catch (IOException ex) {
+            throw new RuntimeException("Error: ", ex);
         }
     }
 }
